@@ -1,0 +1,668 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0A0A0F;--bg2:#111118;--bg3:#16161F;--bg4:#1E1E2A;
+    --border:#2A2A38;--border2:#353548;
+    --text:#F0F0F8;--text2:#9898B0;--text3:#5A5A72;
+    --gold:#E8C97A;--gold2:#C4A44A;--gold-dim:#3A3020;
+    --blue:#7B8FFF;--blue2:#4B5BD4;--blue-dim:#1A1E3A;
+    --green:#52D98A;--green2:#2E9958;--green-dim:#0F2A1E;
+    --red:#FF6B7A;--red2:#C4364A;--red-dim:#2A1018;
+    --amber:#FFB84D;--amber-dim:#2A2010;
+    --r:12px;--r2:8px;--r3:20px;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
+  .mono{font-family:'DM Mono',monospace}
+  
+  /* Nav */
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+  .logo{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:600;letter-spacing:2px}
+  .logo-dot{width:8px;height:8px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
+  .nav-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:2px}
+  .nav-tabs::-webkit-scrollbar{display:none}
+  .nav-tabs{-ms-overflow-style:none;scrollbar-width:none}
+  .nav-tab{padding:6px 14px;border-radius:var(--r2);border:none;background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:.2s;white-space:nowrap}
+  .nav-tab:hover{color:var(--text);background:var(--bg3)}
+  .nav-tab.active{background:var(--bg4);color:var(--text);border:1px solid var(--border2)}
+
+  /* Layout */
+  .screen{padding:20px;max-width:440px;margin:0 auto;animation:fadeIn .3s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  /* Cards */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
+  .card-sm{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:12px}
+  .card-glow{border-color:var(--gold2);box-shadow:0 0 20px rgba(232,201,122,.06)}
+
+  /* Coin Hero */
+  .hero-card{background:linear-gradient(135deg,#0F0F1A 0%,#1A1830 50%,#0F0F1A 100%);border:1px solid var(--border2);border-radius:var(--r3);padding:24px 20px;margin-bottom:12px;position:relative;overflow:hidden}
+  .hero-card::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:radial-gradient(circle,rgba(232,201,122,.12) 0%,transparent 70%);pointer-events:none}
+  .hero-label{font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:4px}
+  .hero-coins{font-size:38px;font-weight:600;color:var(--gold);letter-spacing:-1px;line-height:1}
+  .hero-sub{font-size:12px;color:var(--text3);margin-top:6px}
+  .coin-row{display:flex;gap:8px;margin-top:16px}
+  .coin-pill{flex:1;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px}
+  .coin-pill-label{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+  .coin-pill-val{font-size:18px;font-weight:600}
+  .hard-val{color:var(--green)}
+  .soft-val{color:var(--amber)}
+
+  /* Trust Score */
+  .trust-wrap{display:flex;align-items:center;gap:12px;margin-top:14px}
+  .trust-arc{width:56px;height:56px;position:relative;flex-shrink:0}
+  .trust-arc svg{width:56px;height:56px}
+  .trust-score-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;font-weight:600}
+  .trust-info{flex:1}
+  .trust-tier{font-size:13px;font-weight:500;margin-bottom:2px}
+  .trust-desc{font-size:11px;color:var(--text3)}
+
+  /* Progress bar */
+  .progress-track{background:var(--bg4);border-radius:20px;height:6px;overflow:hidden;margin:4px 0}
+  .progress-fill{height:100%;border-radius:20px;transition:width .8s cubic-bezier(.34,1.56,.64,1)}
+
+  /* Status badge */
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500}
+  .badge-pending{background:var(--amber-dim);color:var(--amber)}
+  .badge-success{background:var(--green-dim);color:var(--green)}
+  .badge-failed{background:var(--red-dim);color:var(--red)}
+  .badge-locked{background:var(--blue-dim);color:var(--blue)}
+  .badge-unlocked{background:var(--green-dim);color:var(--green)}
+
+  /* Buttons */
+  .btn{width:100%;padding:14px;border-radius:var(--r);border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:.2s;letter-spacing:.3px}
+  .btn:active{transform:scale(.98)}
+  .btn-gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1A1200}
+  .btn-gold:hover{filter:brightness(1.1)}
+  .btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+  .btn-outline:hover{border-color:var(--border);color:var(--text);background:var(--bg3)}
+  .btn-sm{padding:8px 14px;width:auto;font-size:12px;border-radius:var(--r2)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+  /* Input */
+  .input-group{margin-bottom:14px}
+  .input-label{font-size:12px;color:var(--text2);margin-bottom:6px;display:block}
+  .input-wrap{position:relative}
+  .inp{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:22px;font-weight:500;outline:none;transition:.2s}
+  .inp:focus{border-color:var(--gold2)}
+  .inp-prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:18px;pointer-events:none}
+  .inp-pl{padding-left:28px}
+
+  /* Tx list */
+  .tx-item{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border)}
+  .tx-item:last-child{border-bottom:none}
+  .tx-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-right:10px}
+  .tx-icon-s{background:var(--green-dim)}
+  .tx-icon-f{background:var(--red-dim)}
+  .tx-icon-p{background:var(--amber-dim)}
+  .tx-left{display:flex;align-items:flex-start;flex:1}
+  .tx-title{font-size:13px;font-weight:500;margin-bottom:3px}
+  .tx-meta{font-size:11px;color:var(--text3)}
+  .tx-right{text-align:right;flex-shrink:0}
+  .tx-coins{font-size:13px;font-weight:600}
+  .tx-date{font-size:10px;color:var(--text3);margin-top:2px}
+
+  /* Product card */
+  .product-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+  .product-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .product-name{font-size:14px;font-weight:500;margin-bottom:3px}
+  .product-brand{font-size:11px;color:var(--text3)}
+  .product-price{font-size:15px;font-weight:600;color:var(--gold);margin-bottom:4px}
+  .product-right{margin-left:auto;text-align:right;flex-shrink:0}
+
+  /* Sim overlay */
+  .sim-box{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:16px;margin-bottom:12px}
+  .sim-title{font-size:12px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+  .sim-step{display:flex;align-items:center;gap:10px;padding:7px 0}
+  .sim-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .sim-dot-active{background:var(--amber);box-shadow:0 0 6px var(--amber)}
+  .sim-dot-done{background:var(--green)}
+  .sim-dot-fail{background:var(--red)}
+  .sim-dot-idle{background:var(--bg4);border:1px solid var(--border)}
+  .sim-step-text{font-size:12px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spin{animation:spin 1s linear infinite;display:inline-block}
+
+  /* Divider */
+  .divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+  
+  /* Section title */
+  .sec-title{font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px}
+  
+  /* Score bar */
+  .score-bar-wrap{margin:10px 0}
+  .score-segments{display:flex;gap:3px;height:6px;border-radius:20px;overflow:hidden}
+  .score-seg{flex:1;border-radius:3px;transition:.5s}
+  
+  /* Coin anim */
+  @keyframes coinFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .coin-anim{animation:coinFloat 2s ease-in-out infinite}
+  @keyframes shimmer{0%{opacity:.6}100%{opacity:1}}
+  .shimmer{animation:shimmer .8s ease-in-out infinite alternate}
+
+  /* Toast */
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:10px 18px;font-size:13px;z-index:999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
+  .toast.show{opacity:1}
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mt4{margin-top:4px}
+  .mt8{margin-top:8px}
+  .mt12{margin-top:12px}
+  .mt16{margin-top:16px}
+  .mt20{margin-top:20px}
+  .muted{color:var(--text2)}
+  .small{font-size:12px}
+  .bold{font-weight:600}
+  .flex-between{display:flex;justify-content:space-between;align-items:center}
+  .unlock-tag{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--amber-dim);color:var(--amber);margin-left:6px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const {useState, useEffect, useRef} = React;
+
+const PRODUCTS = [
+  {id:1,name:'AirPods Pro',brand:'Apple',coins:18000,icon:'🎧',bg:'#1A1A2E'},
+  {id:2,name:'Smart Watch',brand:'Samsung',coins:24000,icon:'⌚',bg:'#1A2A1E'},
+  {id:3,name:'Coffee Voucher',brand:'Blue Tokai',coins:2500,icon:'☕',bg:'#2A1E10'},
+  {id:4,name:'OTT Bundle',brand:'6-month pack',coins:5000,icon:'🎬',bg:'#1A1030'},
+  {id:5,name:'Flight Upgrade',brand:'IndiGo Business',coins:35000,icon:'✈',bg:'#0F1E2A'},
+];
+
+function formatNum(n){return n.toLocaleString('en-IN')}
+function timeStr(){return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}
+
+function TrustArc({score}){
+  const r=22,cx=28,cy=28,circ=2*Math.PI*r;
+  const fill=circ*(score/100);
+  const color=score>=70?'#52D98A':score>=40?'#FFB84D':'#FF6B7A';
+  return React.createElement('svg',{viewBox:'0 0 56 56'},
+    React.createElement('circle',{cx,cy,r,fill:'none',stroke:'#1E1E2A',strokeWidth:5}),
+    React.createElement('circle',{cx,cy,r,fill:'none',stroke:color,strokeWidth:5,
+      strokeDasharray:`${fill} ${circ}`,strokeLinecap:'round',
+      transform:'rotate(-90 28 28)',style:{transition:'stroke-dasharray .8s ease'}}),
+  );
+}
+
+function Toast({msg}){
+  return React.createElement('div',{className:`toast ${msg?'show':''}`},msg);
+}
+
+function App(){
+  const [tab,setTab]=useState('dashboard');
+  const [softCoins,setSoftCoins]=useState(4200);
+  const [hardCoins,setHardCoins]=useState(12800);
+  const [trustScore,setTrustScore]=useState(68);
+  const [transactions,setTransactions]=useState([
+    {id:1,amount:15000,coins:15000,status:'success',coinState:'unlocked',time:'09:42 AM',label:'HDFC Bill'},
+    {id:2,amount:8000,coins:8000,status:'success',coinState:'unlocked',time:'Yesterday'},
+    {id:3,amount:5200,coins:5200,status:'failed',coinState:'reversed',time:'2 days ago'},
+  ]);
+  const [payAmt,setPayAmt]=useState('');
+  const [simState,setSimState]=useState(null);
+  const [toast,setToast]=useState('');
+  const [reserved,setReserved]=useState({});
+  const [selectedPersona, setSelectedPersona]=useState('good');
+  const txIdRef=useRef(10);
+
+  useEffect(()=>{if(toast){const t=setTimeout(()=>setToast(''),2500);return()=>clearTimeout(t)}},[toast]);
+
+  function showToast(m){setToast(m)}
+
+  function changePersona(type) {
+    setSelectedPersona(type);
+    if(type==='good'){
+      setTrustScore(95);
+      setHardCoins(12800);
+      setSoftCoins(4200);
+      setTransactions([
+        {id:1,amount:15000,coins:15000,status:'success',coinState:'unlocked',time:'09:42 AM',label:'HDFC Bill'},
+        {id:2,amount:8000,coins:8000,status:'success',coinState:'unlocked',time:'Yesterday',label:'Credit Card Bill'}
+      ]);
+    } else {
+      setTrustScore(32);
+      setHardCoins(1500);
+      setSoftCoins(0);
+      setTransactions([
+        {id:3,amount:5200,coins:5200,status:'failed',coinState:'reversed',time:'1 hr ago',label:'Amazon'},
+        {id:4,amount:11000,coins:11000,status:'failed',coinState:'reversed',time:'Yesterday',label:'Uber'}
+      ]);
+    }
+  }
+
+  function handlePay(){
+    const amt=parseInt(payAmt);
+    if(!amt||amt<100){showToast('Minimum payment ₹100');return;}
+    const coins=Math.floor(amt);
+    const txId=++txIdRef.current;
+    const ts=timeStr();
+
+    setPayAmt('');
+    setSoftCoins(p=>p+coins);
+
+    const payload = selectedPersona === 'good' ? {
+      cibil_score: 850, account_age_days: 1500, user_history_score: 90, transaction_amount: amt,
+      bank_balance: 40000, insufficient_funds_flag: 0, ip_switching_frequency: 0, rooted_device_flag: 0,
+      multiple_attempts_short_time: 0, account_behavior_score: 95, past_failure_count: 0,
+      success_rate: 0.99, always_fails_after_spending_flag: 0, velocity_score: 10,
+      anomaly_score: 5, transaction_type_international: 0
+    } : {
+      cibil_score: 450, account_age_days: 30, user_history_score: 30, transaction_amount: amt,
+      bank_balance: 5000, insufficient_funds_flag: 1, ip_switching_frequency: 5, rooted_device_flag: 1,
+      multiple_attempts_short_time: 4, account_behavior_score: 20, past_failure_count: 5,
+      success_rate: 0.40, always_fails_after_spending_flag: 1, velocity_score: 95,
+      anomaly_score: 90, transaction_type_international: 1
+    };
+
+    setSimState({persona:selectedPersona, step:0, logs:[{text: `Initiating ₹${formatNum(amt)} payment...`, type: 'info'}], features: []});
+
+    fetch('http://127.0.0.1:5000/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(r => r.json()).then(data => {
+      const isFraud = data.fraud_prediction === 1;
+      const prob = (data.fraud_probability * 100).toFixed(1);
+      
+      setSimState(p => ({...p, step: 1, features: data.feature_weights || [], logs: [
+        ...p.logs, 
+        {text: `Nexus Model: Analyzed ${data.feature_weights?.length||0} factors...`, type: 'info'},
+        {text: `Trust Engine: Fraud Probability ${prob}% -> ${isFraud ? 'CRITICAL RISK' : 'LOW RISK'}`, type: isFraud ? 'error' : 'success'}
+      ]}));
+
+      setTimeout(() => {
+        if (!isFraud) {
+          const newTx={id:txId,amount:amt,coins,status:'success',coinState:'unlocked',time:ts,label:'Credit Card Bill'};
+          setTransactions(p=>[newTx,...p]);
+          setSoftCoins(p=>p-coins);
+          setHardCoins(p=>p+coins);
+          setTrustScore(p=>Math.min(100,p+10));
+          showToast(`+${formatNum(coins)} coins unlocked!`);
+          setSimState(p => ({...p, step: 2, logs: [...p.logs, {text: 'Bank Gateway: Payment authorized.', type: 'info'}, {text: `Reward Engine: +${formatNum(coins)} Coins unlocked!`, type: 'success'}]}));
+        } else {
+          const newTx={id:txId,amount:amt,coins,status:'failed',coinState:'reversed',time:ts,label:'Credit Card Bill'};
+          setTransactions(p=>[newTx,...p]);
+          setSoftCoins(p=>p-coins);
+          setTrustScore(p=>Math.max(0,p-20));
+          showToast('Payment failed — coins reversed');
+          setSimState(p => ({...p, step: 2, logs: [...p.logs, {text: 'Fraud Shield: Transaction intercepted!', type: 'error'}, {text: 'Bank Gateway: Payment declined.', type: 'error'}, {text: 'Reward Engine: Coins REVERSED.', type: 'error'}]}));
+        }
+      }, 1500);
+    }).catch(err => {
+      setSimState(p => ({...p, step: 2, logs: [...p.logs, {text: 'API Error: Backend not running. Run python main.py', type: 'error'}]}));
+      setSoftCoins(p=>p-coins);
+    });
+  }
+
+  function buyProduct(p){
+    if(hardCoins>=p.coins){
+      setHardCoins(c=>c-p.coins);
+      showToast(`${p.name} redeemed!`);
+    } else {
+      showToast('Reserve feature activated');
+      setReserved(r=>({...r,[p.id]:true}));
+    }
+  }
+
+  const trustTier=trustScore>=70?{label:'High Trust',color:'#52D98A',desc:'Instant coin unlock'}:
+    trustScore>=40?{label:'Medium Trust',color:'#FFB84D',desc:'Partial unlock (80%)'}:
+    {label:'Low Trust',color:'#FF6B7A',desc:'Full lock, 24-48h delay'};
+
+  const unlockPct=Math.min(100,trustScore>=70?100:trustScore>=40?80:0);
+
+  return React.createElement('div',null,
+    // NAV
+    React.createElement('nav',{className:'nav'},
+      React.createElement('div',{className:'logo'},
+        React.createElement('div',{className:'logo-dot'}),
+        'NEXUS'
+      ),
+      React.createElement('div',{className:'nav-tabs'},
+        ['dashboard','pay','wallet','store','trust'].map(t=>
+          React.createElement('button',{key:t,className:`nav-tab ${tab===t?'active':''}`,onClick:()=>{setTab(t);setSimState(null)}},
+            t==='dashboard'?'Home':t==='pay'?'Pay':t==='wallet'?'Wallet':t==='store'?'Store':'Score'
+          )
+        )
+      )
+    ),
+
+    // SCREENS
+    tab==='dashboard'&&React.createElement(Dashboard,{softCoins,hardCoins,trustScore,trustTier,unlockPct,setTab}),
+    tab==='pay'&&React.createElement(PayScreen,{payAmt,setPayAmt,handlePay,simState,setSimState,selectedPersona,setSelectedPersona:changePersona}),
+    tab==='wallet'&&React.createElement(WalletScreen,{softCoins,hardCoins,transactions}),
+    tab==='store'&&React.createElement(StoreScreen,{hardCoins,softCoins,buyProduct,reserved}),
+    tab==='trust'&&React.createElement(TrustScreen,{trustScore,trustTier,transactions}),
+
+    React.createElement(Toast,{msg:toast})
+  );
+}
+
+function Dashboard({softCoins,hardCoins,trustScore,trustTier,unlockPct,setTab}){
+  const total=softCoins+hardCoins;
+  return React.createElement('div',{className:'screen'},
+    // Hero
+    React.createElement('div',{className:'hero-card'},
+      React.createElement('div',{className:'hero-label'},'Total Coins'),
+      React.createElement('div',{className:'flex-between'},
+        React.createElement('div',{className:'hero-coins coin-anim'},`⬡ ${formatNum(total)}`),
+      ),
+      React.createElement('div',{className:'hero-sub'},'Credit card bills paid → instant rewards'),
+      React.createElement('div',{className:'coin-row'},
+        React.createElement('div',{className:'coin-pill'},
+          React.createElement('div',{className:'coin-pill-label'},'Spendable'),
+          React.createElement('div',{className:'coin-pill-val hard-val'},`${formatNum(hardCoins)}`),
+        ),
+        React.createElement('div',{className:'coin-pill'},
+          React.createElement('div',{className:'coin-pill-label'},'Unlocking'),
+          React.createElement('div',{className:'coin-pill-val soft-val shimmer'},`${formatNum(softCoins)}`),
+        ),
+      ),
+      // Trust inside hero
+      React.createElement('div',{className:'trust-wrap'},
+        React.createElement('div',{className:'trust-arc'},
+          React.createElement(TrustArc,{score:trustScore}),
+          React.createElement('div',{className:'trust-score-num',style:{color:trustTier.color}},trustScore)
+        ),
+        React.createElement('div',{className:'trust-info'},
+          React.createElement('div',{className:'trust-tier',style:{color:trustTier.color}},trustTier.label),
+          React.createElement('div',{className:'trust-desc'},trustTier.desc)
+        ),
+        React.createElement('div',{className:'progress-track',style:{flex:1,alignSelf:'center'}},
+          React.createElement('div',{className:'progress-fill',
+            style:{width:`${unlockPct}%`,background:`linear-gradient(90deg,${trustTier.color}88,${trustTier.color})`}})
+        )
+      )
+    ),
+
+    // Quick actions
+    React.createElement('div',{className:'row2'},
+      React.createElement('button',{className:'btn btn-gold',style:{borderRadius:'var(--r)'},onClick:()=>setTab('pay')},'Pay Bill'),
+      React.createElement('button',{className:'btn btn-outline',style:{borderRadius:'var(--r)'},onClick:()=>setTab('store')},'Redeem')
+    ),
+
+    // Soft coins status
+    softCoins>0&&React.createElement('div',{className:'card mt12',style:{borderColor:'var(--amber2)',background:'var(--amber-dim)'}},
+      React.createElement('div',{className:'flex-between'},
+        React.createElement('div',null,
+          React.createElement('div',{className:'small',style:{color:'var(--amber)'}},`⏳ ${formatNum(softCoins)} coins unlocking`),
+          React.createElement('div',{className:'small muted mt4'},'Awaiting payment settlement')
+        ),
+        React.createElement('div',{className:'progress-track',style:{width:80}},
+          React.createElement('div',{className:'progress-fill shimmer',style:{width:'60%',background:'var(--amber)'}})
+        )
+      )
+    ),
+
+    // Stats
+    React.createElement('div',{className:'sec-title mt20'},'Quick Stats'),
+    React.createElement('div',{className:'row2'},
+      React.createElement('div',{className:'card-sm'},
+        React.createElement('div',{className:'small muted'},'Lifetime Earned'),
+        React.createElement('div',{className:'bold mt4',style:{fontSize:16}},`⬡ ${formatNum(hardCoins+softCoins+29400)}`)
+      ),
+      React.createElement('div',{className:'card-sm'},
+        React.createElement('div',{className:'small muted'},'Bills Paid'),
+        React.createElement('div',{className:'bold mt4',style:{fontSize:16}},'₹2.4L')
+      )
+    )
+  );
+}
+
+function PayScreen({payAmt,setPayAmt,handlePay,simState,setSimState,selectedPersona,setSelectedPersona}){
+  const amt=parseInt(payAmt)||0;
+  const coins=amt;
+
+  return React.createElement('div',{className:'screen'},
+    React.createElement('div',{className:'sec-title'},'Pay Credit Card Bill'),
+    
+    !simState && React.createElement('div', {className:'card', style:{padding:'12px 16px'}},
+       React.createElement('div', {className:'sec-title', style:{marginBottom:'12px'}}, 'Select Profile for Simulation'),
+       React.createElement('div', {style:{display:'flex', gap:'8px', flexDirection:'column'}},
+          React.createElement('div', {
+            onClick:()=>setSelectedPersona('good'),
+            style:{padding:'12px', display:'flex', alignItems:'center', justifyContent:'space-between', border:selectedPersona==='good'?'1px solid var(--green)':'1px solid var(--border)', borderRadius:'var(--r2)', cursor:'pointer', background:selectedPersona==='good'?'var(--green-dim)':'var(--bg3)', transition:'.2s'}
+          },
+             React.createElement('div', null,
+               React.createElement('div', {className:'bold', style:{color:selectedPersona==='good'?'var(--green)':'var(--text)'}}, 'User A: Loyal Spender'),
+               React.createElement('div', {className:'small muted'}, 'Clean History | Valid IP')
+             ),
+             React.createElement('div', {className:'trust-arc', style:{width:'36px', height:'36px'}},
+               React.createElement(TrustArc, {score:95}),
+               React.createElement('div', {className:'trust-score-num', style:{color:'#52D98A', fontSize:10}}, '95')
+             )
+          ),
+          React.createElement('div', {
+            onClick:()=>setSelectedPersona('bad'),
+            style:{padding:'12px', display:'flex', alignItems:'center', justifyContent:'space-between', border:selectedPersona==='bad'?'1px solid var(--red)':'1px solid var(--border)', borderRadius:'var(--r2)', cursor:'pointer', background:selectedPersona==='bad'?'var(--red-dim)':'var(--bg3)', transition:'.2s'}
+          },
+             React.createElement('div', null,
+               React.createElement('div', {className:'bold', style:{color:selectedPersona==='bad'?'var(--red)':'var(--text)'}}, 'User B: Velocity Risk'),
+               React.createElement('div', {className:'small muted'}, 'Suspicious Activity | VPN IP')
+             ),
+             React.createElement('div', {className:'trust-arc', style:{width:'36px', height:'36px'}},
+               React.createElement(TrustArc, {score:32}),
+               React.createElement('div', {className:'trust-score-num', style:{color:'#FF6B7A', fontSize:10}}, '32')
+             )
+          )
+       )
+    ),
+
+    !simState && React.createElement('div',{className:'card card-glow'},
+      React.createElement('div',{className:'input-group'},
+        React.createElement('label',{className:'input-label'},'Enter Bill Amount'),
+        React.createElement('div',{className:'input-wrap'},
+          React.createElement('span',{className:'inp-prefix'},'₹'),
+          React.createElement('input',{className:'inp inp-pl mono',type:'number',placeholder:'0',
+            value:payAmt,onChange:e=>setPayAmt(e.target.value)})
+        )
+      ),
+      
+      React.createElement('div',{className:'mt12'},
+        React.createElement('button',{className:'btn btn-gold',onClick:handlePay,disabled:!amt||amt<100},
+          `Pay ₹${amt>0?formatNum(amt):'—'}`)
+      )
+    ),
+
+    simState&&React.createElement('div', null,
+      React.createElement('div',{className:'card mt12', style:{padding:'12px'}},
+        React.createElement('div',{className:'sec-title', style:{marginBottom:'10px'}},'Risk Factors Evaluation (ML Model Weights)'),
+        simState.features && simState.features.length > 0 ? React.createElement('div',{style:{display:'flex', flexDirection:'column', gap:'8px'}},
+          simState.features.slice(0, 5).map(f => {
+            const pct = (f.weight * 100).toFixed(1);
+            return React.createElement('div', {key:f.feature, style:{padding:'8px 10px', background:'var(--bg4)', border:'1px solid var(--border)', borderRadius:'var(--r2)'}},
+               React.createElement('div', {className:'flex-between', style:{marginBottom:'4px'}},
+                 React.createElement('div', {className:'small'}, f.feature.replace(/_/g, ' ').toUpperCase()),
+                 React.createElement('div', {className:'small bold'}, `Weight: ${pct}%`)
+               ),
+               React.createElement('div', {className:'small muted', style:{marginBottom:'6px'}}, `Value Provided: ${f.value}`),
+               React.createElement('div', {className:'progress-track', style:{height:'4px'}},
+                 React.createElement('div', {className:'progress-fill', style:{width:`${pct}%`, background:'var(--gold)'}})
+               )
+            )
+          })
+        ) : React.createElement('div', {className:'small muted'}, 'Waiting for model prediction...')
+      ),
+
+      React.createElement('div',{className:'sim-box'},
+        React.createElement('div',{className:'sim-title'},'Sentinel Engine Log'),
+        React.createElement('div', {className:'mono small', style:{background:'var(--bg)', borderRadius:'var(--r2)', padding:'12px', height:'200px', overflowY:'auto', display:'flex', flexDirection:'column', gap:'10px', border:'1px solid var(--border)'}},
+          simState.logs.map((L,i)=>React.createElement('div', {key:i, style:{color:L.type==='error'?'var(--red)':L.type==='success'?'var(--green)':'var(--text)'}}, '>> ' + L.text)),
+          simState.step<3 && React.createElement('div', {className:'shimmer', style:{color:'var(--text2)'}}, '>> _')
+        ),
+        simState.step>=3&&React.createElement('button',{className:'btn btn-outline mt12',style:{padding:'8px', width:'100%'},
+          onClick:()=>setSimState(null)},'New Payment')
+      )
+    )
+  );
+}
+
+function WalletScreen({softCoins,hardCoins,transactions}){
+  return React.createElement('div',{className:'screen'},
+    React.createElement('div',{className:'row2'},
+      React.createElement('div',{className:'card-sm',style:{borderColor:'var(--green2)',background:'var(--green-dim)'}},
+        React.createElement('div',{className:'small',style:{color:'var(--green2)'}},'Spendable'),
+        React.createElement('div',{className:'bold mt4',style:{fontSize:20,color:'var(--green)'}},`⬡ ${formatNum(hardCoins)}`),
+      ),
+      React.createElement('div',{className:'card-sm',style:{borderColor:'#3A3010',background:'var(--amber-dim)'}},
+        React.createElement('div',{className:'small',style:{color:'var(--amber2)'}},'Unlocking'),
+        React.createElement('div',{className:'bold mt4',style:{fontSize:20,color:'var(--amber)'},className:'shimmer'},`⬡ ${formatNum(softCoins)}`),
+      ),
+    ),
+
+    softCoins>0&&React.createElement('div',{className:'card mt12',style:{borderColor:'var(--amber2)'}},
+      React.createElement('div',{className:'small muted'},'Unlock progress'),
+      React.createElement('div',{className:'progress-track mt8'},
+        React.createElement('div',{className:'progress-fill shimmer',style:{width:'60%',background:'var(--amber)'}})
+      ),
+      React.createElement('div',{className:'small muted mt4'},'Est. time: Awaiting bank settlement')
+    ),
+
+    React.createElement('div',{className:'sec-title mt16'},'Transaction History'),
+    React.createElement('div',{className:'card'},
+      transactions.map(tx=>React.createElement('div',{key:tx.id,className:'tx-item'},
+        React.createElement('div',{className:'tx-left'},
+          React.createElement('div',{className:`tx-icon ${tx.status==='success'?'tx-icon-s':tx.status==='failed'?'tx-icon-f':'tx-icon-p'}`},
+            tx.status==='success'?'✓':tx.status==='failed'?'✕':'⏳'
+          ),
+          React.createElement('div',null,
+            React.createElement('div',{className:'tx-title'},tx.label||'Credit Card Bill'),
+            React.createElement('div',{className:'tx-meta'},`₹${formatNum(tx.amount)}`),
+            React.createElement('div',{className:'mt4'},
+              React.createElement('span',{className:`badge badge-${tx.status}`},tx.status),
+              React.createElement('span',{className:`badge badge-${tx.coinState}`,style:{marginLeft:4}},tx.coinState),
+            )
+          )
+        ),
+        React.createElement('div',{className:'tx-right'},
+          React.createElement('div',{className:'tx-coins',style:{color:tx.coinState==='unlocked'?'var(--green)':tx.coinState==='reversed'?'var(--red)':'var(--amber)'}},
+            tx.coinState==='reversed'?`−${formatNum(tx.coins)}`:`+${formatNum(tx.coins)}`
+          ),
+          React.createElement('div',{className:'tx-date'},tx.time)
+        )
+      ))
+    )
+  );
+}
+
+function StoreScreen({hardCoins,softCoins,buyProduct,reserved}){
+  return React.createElement('div',{className:'screen'},
+    React.createElement('div',{className:'card-sm',style:{marginBottom:12,background:'var(--bg3)'}},
+      React.createElement('div',{className:'flex-between'},
+        React.createElement('span',{className:'small muted'},'Available to spend'),
+        React.createElement('span',{className:'bold',style:{color:'var(--green)'}},`⬡ ${formatNum(hardCoins)}`)
+      ),
+      softCoins>0&&React.createElement('div',{className:'flex-between mt4'},
+        React.createElement('span',{className:'small muted'},'Still unlocking'),
+        React.createElement('span',{className:'small',style:{color:'var(--amber)'}},`⬡ ${formatNum(softCoins)} ⏳`)
+      )
+    ),
+
+    React.createElement('div',{className:'sec-title'},'Redeem Coins'),
+    PRODUCTS.map(p=>{
+      const canBuy=hardCoins>=p.coins;
+      const isReserved=reserved[p.id];
+      return React.createElement('div',{key:p.id,className:'product-card'},
+        React.createElement('div',{className:'product-icon',style:{background:p.bg}},p.icon),
+        React.createElement('div',{style:{flex:1}},
+          React.createElement('div',{className:'product-name'},p.name),
+          React.createElement('div',{className:'product-brand'},p.brand),
+          React.createElement('div',{className:'product-price',style:{marginTop:6}},`⬡ ${formatNum(p.coins)}`)
+        ),
+        React.createElement('div',{className:'product-right'},
+          isReserved?
+            React.createElement('div',{className:'badge badge-pending'},'Reserved ✓'):
+          canBuy?
+            React.createElement('button',{className:'btn btn-gold btn-sm',onClick:()=>buyProduct(p)},'Redeem'):
+            React.createElement('div',null,
+              React.createElement('button',{className:'btn btn-outline btn-sm',onClick:()=>buyProduct(p)},'Reserve'),
+              React.createElement('div',{className:'small',style:{color:'var(--text3)',marginTop:4,fontSize:10}},
+                `Need ${formatNum(p.coins-hardCoins)} more`
+              )
+            )
+        )
+      );
+    })
+  );
+}
+
+function TrustScreen({trustScore,trustTier,transactions}){
+  const segs=10;
+  const filled=Math.round(trustScore/10);
+  const color=trustScore>=70?'var(--green)':trustScore>=40?'var(--amber)':'var(--red)';
+  const stats=[
+    {label:'Successful Payments',val:transactions.filter(t=>t.status==='success').length,icon:'✓',color:'var(--green)'},
+    {label:'Failed Payments',val:transactions.filter(t=>t.status==='failed').length,icon:'✕',color:'var(--red)'},
+    {label:'Trust Change',val:`${trustScore>=50?'+':''}${trustScore-50}`,icon:'△',color:color},
+  ];
+  return React.createElement('div',{className:'screen'},
+    React.createElement('div',{className:'hero-card',style:{textAlign:'center',paddingTop:30}},
+      React.createElement('div',{className:'hero-label'},'Trust Score'),
+      React.createElement('div',{style:{fontSize:56,fontWeight:600,color,lineHeight:1,margin:'8px 0'}},trustScore),
+      React.createElement('div',{style:{display:'inline-flex',alignItems:'center',gap:6,padding:'4px 14px',
+        background:trustScore>=70?'var(--green-dim)':trustScore>=40?'var(--amber-dim)':'var(--red-dim)',
+        borderRadius:20,marginTop:6}},
+        React.createElement('span',{style:{fontSize:13,color,fontWeight:500}},trustTier.label)
+      ),
+      React.createElement('div',{className:'score-segments mt16'},
+        Array.from({length:segs},(_,i)=>React.createElement('div',{key:i,className:'score-seg',
+          style:{background:i<filled?color:'var(--bg4)',height:8}}))
+      ),
+      React.createElement('div',{className:'small muted mt8'},trustTier.desc)
+    ),
+
+    React.createElement('div',{className:'sec-title mt4'},'Unlock Behavior'),
+    React.createElement('div',{className:'card'},
+      [
+        {range:'80–100',speed:'Instant unlock',active:trustScore>=80},
+        {range:'50–79',speed:'Partial (80%) unlock',active:trustScore>=50&&trustScore<80},
+        {range:'0–49',speed:'Full lock (24–48h)',active:trustScore<50},
+      ].map((row,i)=>React.createElement('div',{key:i,className:'flex-between',style:{
+        padding:'10px 12px',borderRadius:'var(--r2)',marginBottom:6,
+        background:row.active?'var(--bg4)':'transparent',
+        border:row.active?'1px solid var(--border2)':'1px solid transparent'
+      }},
+        React.createElement('div',null,
+          React.createElement('span',{className:'badge badge-locked mono',style:{marginRight:8,fontSize:10}},row.range),
+          React.createElement('span',{className:'small'},row.speed)
+        ),
+        row.active&&React.createElement('span',{className:'small',style:{color:'var(--green)'}},'← You')
+      ))
+    ),
+
+    React.createElement('div',{className:'row2'},
+      stats.map((s,i)=>React.createElement('div',{key:i,className:'card-sm',style:{textAlign:'center'}},
+        React.createElement('div',{style:{fontSize:20,color:s.color,fontWeight:600}},s.val),
+        React.createElement('div',{className:'small muted mt4'},s.label)
+      ))
+    ),
+
+    React.createElement('div',{className:'card mt4',style:{background:'var(--bg3)'}},
+      React.createElement('div',{className:'sec-title'},'How to improve'),
+      [
+        'Pay bills on time → +10 per success',
+        'Avoid failed transactions → −20 penalty',
+        'Consistent payments → streak bonus',
+        'Reach 80+ for instant unlocks',
+      ].map((tip,i)=>React.createElement('div',{key:i,className:'small muted',style:{padding:'5px 0',borderBottom:i<3?'1px solid var(--border)':'none'}},
+        `${i+1}. ${tip}`
+      ))
+    )
+  );
+}
+
+
+
+ReactDOM.render(React.createElement(App), document.getElementById('root'));
+</script>
+</body>
+</html>
